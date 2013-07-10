@@ -22,6 +22,7 @@ local.properties
 *.jar
 *.war
 *.ear
+target/
 
 # External tool builders
 .externalToolBuilders/
