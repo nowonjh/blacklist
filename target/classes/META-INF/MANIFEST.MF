@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Built-By: JH
+Build-Jdk: 1.7.0_25
+Bundle-Version: 1.0.0
+Tool: Bnd-0.0.357
+Bundle-Name: Lookup BlackList
+Bnd-LastModified: 1373423043347
+Created-By: Apache Maven Bundle Plugin
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: com.igloo.lookup.blacklist
+Import-Package: org.araqne.api,org.araqne.logdb;version="1.2",org.araq
+ ne.msgbus;version="1.9",org.araqne.msgbus.handler;version="1.9"
+
