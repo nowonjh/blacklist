@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.igloo.lookup</groupId>
+	<groupId>com.igloo</groupId>
 	<artifactId>blacklist</artifactId>
 	<version>1.0.0</version>
 	<packaging>bundle</packaging>
@@ -30,8 +30,8 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Bundle-SymbolicName>com.igloo.lookup.blacklist</Bundle-SymbolicName>
-						<Export-Package>com.igloo.lookup.blacklist</Export-Package>
+						<Bundle-SymbolicName>com.igloo.blacklist</Bundle-SymbolicName>
+						<Export-Package>com.igloo.blacklist</Export-Package>
 						<Import-Package>*</Import-Package>
 					</instructions>
 				</configuration>

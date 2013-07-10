@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class CacheBlacklist {
-	private Map<String, long[]> blacklistIp;
+	private Map<String, LinkedHashMap<String, long[]>> blacklistIp;
 	private Map<String, int[]> vulnPort;
 	private List<String> blacklistUrl;
 	
@@ -30,7 +30,7 @@ public class CacheBlacklist {
 	}
 	
 	public CacheBlacklist(){
-		blacklistIp = new LinkedHashMap<String, long[]>();
+		blacklistIp = new LinkedHashMap<String, LinkedHashMap<String, long[]>>();
 		vulnPort = new LinkedHashMap<String, int[]>();
 		blacklistUrl = new LinkedList<String>();
 		
@@ -44,7 +44,17 @@ public class CacheBlacklist {
 				
 				if("ip".equals(arr[0])){
 					long[] realip = NetUtil.getRealIPWithRange(arr[1]);
-					blacklistIp.put(arr[1], realip);
+
+					try {
+						String key = arr[1].split("\\.")[0];
+						if(blacklistIp.get(key) == null){
+							blacklistIp.put(key, new LinkedHashMap<String, long[]>());
+						}
+						blacklistIp.get(key).put(arr[1], realip);
+						
+					} catch(ArrayIndexOutOfBoundsException e){
+						continue;
+					}				
 				}
 				
 				else if("port".equals(arr[0])){
@@ -82,17 +92,23 @@ public class CacheBlacklist {
 	public boolean isBlackListIP(String ip){
 		long[] realIp = new long[2];
 		boolean flag = false;
-		
+		String address = null;
 		try {
 			realIp = NetUtil.getRealIPWithRange(ip);
+			address = ip.split("\\.")[0];
 		} catch (UnknownHostException e) {
 			return false;
 		}
 		
-		Set<String> keys = blacklistIp.keySet();
+		if(blacklistIp.get(address) == null){
+			return false;
+		}
+		
+		Set<String> keys = blacklistIp.get(address).keySet();
 		for(String key : keys){
-			Long start = blacklistIp.get(key)[0];
-			Long end = blacklistIp.get(key)[1];
+			long[] cache_realip = blacklistIp.get(address).get(key);
+			Long start = cache_realip[0];
+			Long end = cache_realip[1];
 			
 			if (realIp[0] == realIp[1]) {
 				if (start <= realIp[0] && end >= realIp[1]) {
@@ -155,7 +171,10 @@ public class CacheBlacklist {
 	
 	public List<String> ipList(){
 		List<String> list = new LinkedList<String>();
-		list.addAll(blacklistIp.keySet());
+		for(String key : blacklistIp.keySet()){
+			list.addAll(blacklistIp.get(key).keySet());
+		}
+		
 		return list;
 	}
 	
