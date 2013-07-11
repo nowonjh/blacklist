@@ -28,58 +28,50 @@ public class BlackListServiceImpl implements BlackListService{
 	}
 
 	public boolean isUrl(String url) {
-		return cache.isBlackListURL(url);
+		return cache.isBlackListUrl(url);
 	}
-
-
-	public List<String> ipList() {
+	
+	public List<String> listIp() {
 		return cache.ipList();
 	}
 
 
-	public List<String> portList() {
+	public List<String> listPort() {
 		return cache.portList();
 	}
 
 
-	public List<String> urlList() {
+	public List<String> listUrl() {
 		return cache.urlList();
 	}
 
 
 	public boolean addIp(String ip) {
-		// TODO Auto-generated method stub
-		return false;
+		return cache.addIp(ip);
 	}
 
 
 	public boolean addPort(String port) {
-		// TODO Auto-generated method stub
-		return false;
+		return cache.addPort(port);
 	}
 
 
 	public boolean addUrl(String url) {
-		// TODO Auto-generated method stub
-		return false;
+		return cache.addUrl(url);
 	}
 
 
-	public boolean removeIp(String ip) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean removeIp(String ip) { 
+		return cache.removeIp(ip);
 	}
 
 
 	public boolean removePort(String port) {
-		// TODO Auto-generated method stub
-		return false;
+		return cache.removePort(port);
 	}
 
 
 	public boolean removeUrl(String url) {
-		// TODO Auto-generated method stub
-		return false;
+		return cache.removeUrl(url);
 	}
-
 }

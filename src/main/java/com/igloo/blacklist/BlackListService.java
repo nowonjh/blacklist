@@ -7,9 +7,9 @@ public interface BlackListService {
 	boolean isPort(String port);
 	boolean isUrl(String url);
 	
-	List<String> ipList();
-	List<String> portList();
-	List<String> urlList();
+	List<String> listIp();
+	List<String> listPort();
+	List<String> listUrl();
 	
 	boolean addIp(String ip);
 	boolean addPort(String port);

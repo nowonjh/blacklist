@@ -58,7 +58,7 @@ public class NetUtil {
             comp[1] = (tmp_ip | ((1 << netmask) - 1)); // end real ip
             return comp;
         }
-        else if(ips.endsWith(".")){
+        else if(ips.endsWith(".") || ips.endsWith(".*")){
         	long[] comp = new long[2];
         	String[] tmp = {ips, ips};
         	while(tmp[0].split("\\.").length < 4){

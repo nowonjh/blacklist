@@ -6,24 +6,35 @@ import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
 import org.araqne.logdb.LookupHandler;
 import org.araqne.logdb.LookupHandlerRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component(name = "blacklist-lookup-handler")
 public class BlackListLookupHandler implements LookupHandler {
-
+	Logger logger = LoggerFactory.getLogger(BlackListLookupHandler.class.getName());
+	
 	@Requires
 	private LookupHandlerRegistry handlerRegistry;
 	private CacheBlacklist cache;
 	
 	@Validate
 	public void start() {
+		
+		logger.info(handlerRegistry.getLookupHandlerNames().toString());
+		
+		if(handlerRegistry.getLookupHandler("blacklist") != null){
+			handlerRegistry.removeLookupHandler("blacklist");
+		}
 		handlerRegistry.addLookupHandler("blacklist", this);
 		cache = CacheBlacklist.getInstance();
 	}
 
 	@Invalidate
 	public void stop() {
-		if (handlerRegistry != null)
+		if (handlerRegistry != null){
 			handlerRegistry.removeLookupHandler("blacklist");
+		}
+			
 	}
 
 	public Object lookup(String srcField, String dstField, Object value) {
@@ -34,7 +45,7 @@ public class BlackListLookupHandler implements LookupHandler {
 		}
 		if (dstField.equals("url")) {
 			if(value != null){
-				return cache.isBlackListURL(value.toString());
+				return cache.isBlackListUrl(value.toString());
 			}
 			
 		}	

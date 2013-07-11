@@ -16,6 +16,9 @@ public class BlackListPlugin {
 	@Requires
 	private BlackListService blacklist;
 	
+	/* 
+	 * blacklist test 
+	 */
 	@MsgbusMethod
 	public void isIp(Request req, Response resp){
 		String value = req.getString("value");
@@ -34,18 +37,63 @@ public class BlackListPlugin {
 		resp.put("result", blacklist.isUrl(value.toString()));
 	}
 	
+	/* 
+	 * blacklist getList 
+	 */
 	@MsgbusMethod
 	public void ipList(Request req, Response resp){
-		resp.put("result", blacklist.ipList());
+		resp.put("result", blacklist.listIp());
 	}
 	
 	@MsgbusMethod
 	public void portList(Request req, Response resp){
-		resp.put("result", blacklist.portList());
+		resp.put("result", blacklist.listPort());
 	}
 	
 	@MsgbusMethod
 	public void urlList(Request req, Response resp){
-		resp.put("result", blacklist.urlList());
+		resp.put("result", blacklist.listUrl());
+	}
+	
+	/* 
+	 * add blacklist 
+	 */
+	@MsgbusMethod
+	public void addIp(Request req, Response resp){
+		String value = req.getString("value");
+		resp.put("result", blacklist.addIp(value));
+	}
+	
+	@MsgbusMethod
+	public void addPort(Request req, Response resp){
+		String value = req.getString("value");
+		resp.put("result", blacklist.addPort(value));
+	}
+	
+	@MsgbusMethod
+	public void addUrl(Request req, Response resp){
+		String value = req.getString("value");
+		resp.put("result", blacklist.addUrl(value));
+	}
+	
+	/* 
+	 * remove blacklist 
+	 */
+	@MsgbusMethod
+	public void removeIp(Request req, Response resp){
+		String value = req.getString("value");
+		resp.put("result", blacklist.removeIp(value));
+	}
+	
+	@MsgbusMethod
+	public void removePort(Request req, Response resp){
+		String value = req.getString("value");
+		resp.put("result", blacklist.removePort(value));
+	}
+	
+	@MsgbusMethod
+	public void removeUrl(Request req, Response resp){
+		String value = req.getString("value");
+		resp.put("result", blacklist.removeUrl(value));
 	}
 }
