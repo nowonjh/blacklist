@@ -1,11 +1,11 @@
 Manifest-Version: 1.0
 Export-Package: com.igloo.blacklist;uses:="org.araqne.logdb,org.slf4j"
 Built-By: JH
-Build-Jdk: 1.7.0_25
-Bundle-Version: 1.0.0
+Build-Jdk: 1.6.0_45
+Bundle-Version: 1.0.1
 Tool: Bnd-0.0.357
 Bundle-Name: Lookup BlackList
-Bnd-LastModified: 1373526550267
+Bnd-LastModified: 1373592258516
 Created-By: Apache Maven Bundle Plugin
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: com.igloo.blacklist

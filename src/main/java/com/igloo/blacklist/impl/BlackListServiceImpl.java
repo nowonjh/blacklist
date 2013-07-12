@@ -32,17 +32,17 @@ public class BlackListServiceImpl implements BlackListService{
 	}
 	
 	public List<String> listIp() {
-		return cache.ipList();
+		return cache.listIp();
 	}
 
 
 	public List<String> listPort() {
-		return cache.portList();
+		return cache.listPort();
 	}
 
 
 	public List<String> listUrl() {
-		return cache.urlList();
+		return cache.listUrl();
 	}
 
 

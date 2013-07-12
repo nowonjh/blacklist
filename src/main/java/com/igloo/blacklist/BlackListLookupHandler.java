@@ -19,9 +19,6 @@ public class BlackListLookupHandler implements LookupHandler {
 	
 	@Validate
 	public void start() {
-		
-		logger.info(handlerRegistry.getLookupHandlerNames().toString());
-		
 		if(handlerRegistry.getLookupHandler("blacklist") != null){
 			handlerRegistry.removeLookupHandler("blacklist");
 		}

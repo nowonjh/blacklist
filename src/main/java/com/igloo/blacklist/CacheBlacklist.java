@@ -82,16 +82,16 @@ public class CacheBlacklist {
 			}
 			
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		} finally {
 			try {
 				if(br != null){
 					br.close();
 				}
 			} catch (IOException e) {
-				e.printStackTrace();
+				logger.error(e.getMessage(), e);
 			}
 		}
 	}
@@ -123,7 +123,7 @@ public class CacheBlacklist {
 			}
 			blacklistIp.get(key[0]).get(key[1]).put(ip, realip);
 		} catch(Exception e){
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 			return false;
 		}
 		return true;
@@ -169,7 +169,7 @@ public class CacheBlacklist {
 				vulnPort.get(i).put(port, rangePort);
 			}
 		} catch (Exception e){
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 			return false;
 		}
 		
@@ -196,7 +196,6 @@ public class CacheBlacklist {
 	 */
 	public boolean isBlackListIP(String ip){
 		long[] realIp = new long[2];
-		boolean flag = false;
 		String[] address = null;
 		try {
 			realIp = NetUtil.getRealIPWithRange(ip);
@@ -206,10 +205,10 @@ public class CacheBlacklist {
 			return false;
 		}
 		
-		if(blacklistIp.get(address[0]) == null){
+		if(!blacklistIp.containsKey(address[0])){
 			return false;
 		}
-		if(blacklistIp.get(address[0]).get(address[1]) == null){
+		if(!blacklistIp.get(address[0]).containsKey(address[1])){
 			return false;
 		}
 		
@@ -218,19 +217,11 @@ public class CacheBlacklist {
 			long[] cache_realip = blacklistIp.get(address[0]).get(address[1]).get(key);
 			Long start = cache_realip[0];
 			Long end = cache_realip[1];
-			
-			if (realIp[0] == realIp[1]) {
-				if (start <= realIp[0] && end >= realIp[1]) {
-					flag = true;
-				}
-			}
-			else {
-				if (start <= realIp[0] && end >= realIp[1] || start <= realIp[0] && end >= realIp[1]) {
-					flag = true;
-				}
+			if (start <= realIp[0] && end >= realIp[1]) {
+				return true;
 			}
 		}
-		return flag;
+		return false;
 	}
 	
 	
@@ -254,25 +245,42 @@ public class CacheBlacklist {
 	 * @return
 	 */
 	public boolean isBlackListPort(String port) {
-		int int_port = 0;
+		int[] rangePort = new int[2];
 		try {
-			int_port = Integer.parseInt(port);
-		} catch(NumberFormatException e){
-			return false;
-		}
-		
-		try {
-			int address = int_port / 1000;
-			Set<String> keys = vulnPort.get(address).keySet();
-			for(String key : keys){
-				Integer start = vulnPort.get(address).get(key)[0];
-				Integer end = vulnPort.get(address).get(key)[1];
-				
-				if (start <= int_port && end >= int_port) {
-					return true;
+			if(port.indexOf("~") > -1){	
+				rangePort[0] = Integer.parseInt(port.split("~")[0]);
+				rangePort[1] = Integer.parseInt(port.split("~")[1]);
+			} else {
+				rangePort[0] = Integer.parseInt(port);
+				rangePort[1] = rangePort[0];
+			}
+			
+			List<Integer> address = new LinkedList<Integer>();
+			if(rangePort[0] / 1000 != rangePort[1] / 1000){
+				int startKey = rangePort[0] / 1000;
+				int endKey = rangePort[1] / 1000;
+				while(startKey <= endKey){
+					address.add(startKey);
+					startKey++;
 				}
 			}
-		} catch (Exception e) {
+			else {
+				address.add(rangePort[0] / 1000);
+			}
+			
+			for(Integer i : address){
+				if(vulnPort.containsKey(i)){
+					for(String key : vulnPort.get(i).keySet()){
+						Integer start = vulnPort.get(i).get(key)[0];
+						Integer end = vulnPort.get(i).get(key)[1];
+						if (start <= rangePort[0] && end >= rangePort[1]) {
+							return true;
+						}
+					}
+				}
+			}
+		} catch (Exception e){
+			logger.error(e.getMessage(), e);
 			return false;
 		}
 		return false;
@@ -282,7 +290,7 @@ public class CacheBlacklist {
 	 * 유해IP 리스트를 반환
 	 * @return
 	 */
-	public List<String> ipList(){
+	public List<String> listIp(){
 		List<String> list = new LinkedList<String>();
 		for(String first_key : blacklistIp.keySet()){
 			for(String second_key : blacklistIp.get(first_key).keySet()){
@@ -296,7 +304,7 @@ public class CacheBlacklist {
 	 * 유해 port 리스트를 반환
 	 * @return
 	 */
-	public List<String> portList(){
+	public List<String> listPort(){
 		List<String> list = new LinkedList<String>();
 		for(Integer key : vulnPort.keySet()){
 			list.addAll(vulnPort.get(key).keySet());
@@ -308,7 +316,7 @@ public class CacheBlacklist {
 	 * 유해url 리스트를 반환
 	 * @return
 	 */
-	public List<String> urlList(){
+	public List<String> listUrl(){
 		return blacklistUrl;
 	}
 	
@@ -321,13 +329,13 @@ public class CacheBlacklist {
 	public boolean removeIp(String ip){
 		String[] key = ip.split("\\.");
 		
-		if(blacklistIp.get(key[0]) == null){
+		if(!blacklistIp.containsKey(key[0])){
 			return false;
 		}
-		if(blacklistIp.get(key[0]).get(key[1]) == null){
+		if(!blacklistIp.get(key[0]).containsKey(key[1])){
 			return false;
 		}
-		if(blacklistIp.get(key[0]).get(key[1]).get(ip) == null){
+		if(!blacklistIp.get(key[0]).get(key[1]).containsKey(ip)){
 			return false;
 		}
 		
@@ -341,10 +349,59 @@ public class CacheBlacklist {
 		}
 		return true;
 	}
-	public boolean removePort(String ip){
-		return false;
+	public boolean removePort(String port){
+		if(port == null || "".equals(port)){
+			return false;
+		}
+		
+		try {
+			int[] rangePort = new int[2];
+			
+			if(port.indexOf("~") > -1){	
+				rangePort[0] = Integer.parseInt(port.split("~")[0]);
+				rangePort[1] = Integer.parseInt(port.split("~")[1]);
+			} else {
+				rangePort[0] = Integer.parseInt(port);
+				rangePort[1] = rangePort[0];
+			}
+			
+			List<Integer> address = new LinkedList<Integer>();
+			if(rangePort[0] / 1000 != rangePort[1] / 1000){
+				int startKey = rangePort[0] / 1000;
+				int endKey = rangePort[1] / 1000;
+				while(startKey <= endKey){
+					address.add(startKey);
+					startKey++;
+				}
+			}
+			else {
+				address.add(rangePort[0] / 1000);
+			}
+
+			for(Integer i : address){
+				if(vulnPort.get(i) != null){
+					if(vulnPort.get(i).containsKey(port)){
+						vulnPort.get(i).remove(port);
+					}
+					if(vulnPort.get(i).size() == 0){
+						vulnPort.remove(i);
+					}
+				}
+			}
+		} catch (Exception e){
+			logger.error(e.getMessage(), e);
+			return false;
+		}
+		return true;
 	}
-	public boolean removeUrl(String ip){
-		return false;
+	public boolean removeUrl(String url){
+		int i = blacklistUrl.indexOf(url);
+		if(i == -1){
+			return false;
+		}
+		else {
+			blacklistUrl.remove(i);
+		}
+		return true;
 	}
 }

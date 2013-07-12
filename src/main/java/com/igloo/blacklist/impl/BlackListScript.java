@@ -54,27 +54,20 @@ public class BlackListScript implements Script {
 		}
 	}
 	@ScriptUsage(description = "blackList ip list", arguments = { @ScriptArgument(name = "regex", type = "string", description = "regex match ip.", optional = true)})
-	public void ipList(String[] args){
+	public void listIp(String[] args){
 		printList(blacklist.listIp(), args.length > 0 ? args[0] : null);
 	}
 
 	@ScriptUsage(description = "vulnerable port list", arguments = { @ScriptArgument(name = "regex", type = "string", description = "regex match port.", optional = true)})
-	public void portList(String[] args){
+	public void listPort(String[] args){
 		printList(blacklist.listPort(), args.length > 0 ? args[0] : null);
 	}
 	
 	@ScriptUsage(description = "blackList url list", arguments = { @ScriptArgument(name = "regex", type = "string", description = "regex match url.",  optional = true)})
-	public void urlList(String[] args){
+	public void listUrl(String[] args){
 		printList(blacklist.listUrl(), args.length > 0 ? args[0] : null);
 	}
-	
-	
-	
-	
-	
-	
-	
-	
+
 	@ScriptUsage(description = "add blacklist ip.", arguments = { @ScriptArgument(name = "ip", type = "string", description = "add blacklist ip.")})
 	public void addIp(String[] args){
 		if(CacheBlacklist.getInstance().isBlackListIP(args[0])){

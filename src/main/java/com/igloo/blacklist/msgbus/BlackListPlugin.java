@@ -41,17 +41,17 @@ public class BlackListPlugin {
 	 * blacklist getList 
 	 */
 	@MsgbusMethod
-	public void ipList(Request req, Response resp){
+	public void listIp(Request req, Response resp){
 		resp.put("result", blacklist.listIp());
 	}
 	
 	@MsgbusMethod
-	public void portList(Request req, Response resp){
+	public void listPort(Request req, Response resp){
 		resp.put("result", blacklist.listPort());
 	}
 	
 	@MsgbusMethod
-	public void urlList(Request req, Response resp){
+	public void listUrl(Request req, Response resp){
 		resp.put("result", blacklist.listUrl());
 	}
 	
