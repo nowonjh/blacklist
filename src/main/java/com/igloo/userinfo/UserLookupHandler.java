@@ -1,4 +1,4 @@
-package com.igloo.blacklist;
+package com.igloo.userinfo;
 
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Invalidate;
@@ -11,9 +11,9 @@ import org.slf4j.LoggerFactory;
 
 import com.igloo.util.IglooCache;
 
-@Component(name = "blacklist-lookup-handler")
-public class BlackListLookupHandler implements LookupHandler {
-	Logger logger = LoggerFactory.getLogger(BlackListLookupHandler.class.getName());
+@Component(name = "userinfo-lookup-handler")
+public class UserLookupHandler implements LookupHandler {
+	Logger logger = LoggerFactory.getLogger(UserLookupHandler.class.getName());
 	
 	@Requires
 	private LookupHandlerRegistry handlerRegistry;
@@ -21,39 +21,44 @@ public class BlackListLookupHandler implements LookupHandler {
 	
 	@Validate
 	public void start() {
-		if(handlerRegistry.getLookupHandler("blacklist") != null){
-			handlerRegistry.removeLookupHandler("blacklist");
+		if(handlerRegistry.getLookupHandler("userinfo") != null){
+			handlerRegistry.removeLookupHandler("userinfo");
 		}
-		handlerRegistry.addLookupHandler("blacklist", this);
+		handlerRegistry.addLookupHandler("userinfo", this);
 		cache = IglooCache.getInstance();
 	}
-
+	
 	@Invalidate
 	public void stop() {
 		if (handlerRegistry != null){
-			handlerRegistry.removeLookupHandler("blacklist");
+			handlerRegistry.removeLookupHandler("userinfo");
 		}
 			
 	}
-
+	
 	public Object lookup(String srcField, String dstField, Object value) {
-		if (dstField.equals("ip")) {
+		if (dstField.equals("email")) {
 			if(value != null){
-				return cache.isBlackListIP(value.toString());
+				return cache.getEmail(value.toString());
 			}
 		}
-		if (dstField.equals("url")) {
+		if (dstField.equals("ip")) {
 			if(value != null){
-				return cache.isBlackListUrl(value.toString());
+				return cache.getIp(value.toString());
 			}
 			
 		}	
-		if (dstField.equals("port")) {
+		if (dstField.equals("id")) {
 			if(value != null){
-				return cache.isBlackListPort(value.toString());
+				return cache.getId(value.toString());
 			}
 		}
-		return false;
+		if (dstField.equals("name")) {
+			if(value != null){
+				return cache.getName(value.toString());
+			}
+		}
+		return null;
 	}
-
 }
+

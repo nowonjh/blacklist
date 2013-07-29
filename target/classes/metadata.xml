@@ -2,7 +2,8 @@
 	xsi:schemaLocation="org.apache.felix.ipojo http://felix.apache.org/ipojo/schemas/CURRENT/core.xsd"
 	xmlns="org.apache.felix.ipojo">
 	<instance component="blacklist-lookup-handler" />
-	<instance component="blacklist-service" />
-	<instance component="blacklist-script-factory" />
-	<instance component="blacklist-plugin" />
+	<instance component="userinfo-lookup-handler" />
+	<instance component="iglooutil-service" />
+	<instance component="iglooutil-script-factory" />
+	<instance component="iglooutil-plugin" />
 </ipojo>

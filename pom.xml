@@ -4,10 +4,10 @@
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.igloo</groupId>
-	<artifactId>araqne-blacklist</artifactId>
-	<version>1.0.1</version>
+	<artifactId>araqne-iglooutil</artifactId>
+	<version>1.0.2</version>
 	<packaging>bundle</packaging>
-	<name>Lookup BlackList</name>
+	<name>Igloo Util</name>
 	
 	<repositories>
 		<repository>
@@ -30,8 +30,8 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Bundle-SymbolicName>com.igloo.blacklist</Bundle-SymbolicName>
-						<Export-Package>com.igloo.blacklist</Export-Package>
+						<Bundle-SymbolicName>com.igloo.util</Bundle-SymbolicName>
+						<Export-Package>com.igloo</Export-Package>
 						<Import-Package>*</Import-Package>
 					</instructions>
 				</configuration>

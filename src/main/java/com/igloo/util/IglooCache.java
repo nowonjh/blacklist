@@ -1,8 +1,5 @@
-package com.igloo.blacklist;
+package com.igloo.util;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -14,93 +11,204 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.igloo.blacklist.NetUtil;
+import com.igloo.userinfo.UserInfo;
+
 /**
  * 유해정보를 메모리에 보관하고 있는 싱글턴 클래스
  * 
  * @author JH
  *
  */
-public class CacheBlacklist {
-	Logger logger = LoggerFactory.getLogger(CacheBlacklist.class.getName()); 
+public class IglooCache {
+	Logger logger = LoggerFactory.getLogger(IglooCache.class.getName()); 
 	
 	/* ip 대역을 첫번째, 두번째로 나누어 트리구조로 데이터를 가지고있는다.*/
 	private Map<String, LinkedHashMap<String, LinkedHashMap<String, long[]>>> blacklistIp;
 	private Map<Integer, LinkedHashMap<String, int[]>> vulnPort;
 	private List<String> blacklistUrl;
 	
-	private static CacheBlacklist instance;
+	/* 사용자 정보 */
+	private Map<String, List<Integer>> userKeys;
+	private Map<Integer, LinkedHashMap<Integer, UserInfo>> userMap;
+	private int userIndex;
+	private final byte USER_HASH = 7;
+	
+	private static IglooCache instance;
 	
 	
 	/**
 	 * 해당 싱글톤 인스턴스를 반환
 	 * @return
 	 */
-	public static CacheBlacklist getInstance() {
+	public static IglooCache getInstance() {
 		if(instance == null){
-			synchronized (CacheBlacklist.class) {
-				instance = new CacheBlacklist();
+			synchronized (IglooCache.class) {
+				instance = new IglooCache();
 			}
 		}
-		
 		return instance;
 	}
 	
 	/**
 	 * 기본 생성자
 	 */
-	public CacheBlacklist(){
-		init();
+	public IglooCache(){
+		initCache();
 	}
 
-	/**
-	 * 파일을 읽어 cache를 초기화
-	 */
-	private void init() {
-		/* thread safy map */
+	/* cache instance 를 초기화 한다. */
+	public void initCache(){
+		/* thread safety map */
 		blacklistIp = Collections.synchronizedMap(new LinkedHashMap<String, LinkedHashMap<String, LinkedHashMap<String, long[]>>>());
 		vulnPort = Collections.synchronizedMap(new LinkedHashMap<Integer, LinkedHashMap<String, int[]>>());
 		blacklistUrl = Collections.synchronizedList(new LinkedList<String>());
 		
-		RandomAccessFile br = null;
-		try {
-			br = new RandomAccessFile("blacklist.csv", "r");
-			
-			String line = "";
-			while((line = br.readLine()) != null){
-				String[] arr = line.split("\t");
-				
-				if("ip".equals(arr[0])){
-					addIp(arr[1]);
-				}
-				else if("port".equals(arr[0])){
-					addPort(arr[1]);
-				}
-				
-				else if("url".equals(arr[0])){
-					addUrl(arr[1]);
-				}
-			}
-			
-		} catch (FileNotFoundException e) {
-			logger.error(e.getMessage(), e);
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-		} finally {
-			try {
-				if(br != null){
-					br.close();
-				}
-			} catch (IOException e) {
-				logger.error(e.getMessage(), e);
-			}
+		/* 사용자 정보 */
+		userKeys = Collections.synchronizedMap(new LinkedHashMap<String, List<Integer>>());
+		userMap = Collections.synchronizedMap(new LinkedHashMap<Integer, LinkedHashMap<Integer, UserInfo>>());
+		userIndex = 0;
+	}
+	
+	
+	public boolean addUser(UserInfo user){
+		if(user.getId() == null || "".equals(user.getId())){
+			return false;
+		}
+		
+		int user_key = userIndex++;
+		int hash_key = user_key % USER_HASH;
+		
+		if(userMap.get(hash_key) == null){
+			userMap.put(hash_key, new LinkedHashMap<Integer, UserInfo>());
+		}
+		userMap.get(hash_key).put(user_key, user);
+		
+		/* 사용자 이름은 중복이 있을수 있음 */
+		List<Integer> keyList = new LinkedList<Integer>();
+		if(userKeys.get(user.getName()) != null){
+			keyList = userKeys.get(user.getName());
+		}
+		keyList.add(user_key);
+		
+		userKeys.put(user.getId(), keyList);
+		userKeys.put(user.getName(), keyList);
+		userKeys.put(user.getEmail(), keyList);
+		
+		if(user.getIp() != null){
+			userKeys.put(user.getIp(), keyList);
+		}
+		return true;
+	}
+	
+	public boolean removeUser(String userId){
+		List<Integer> user_keys = userKeys.get(userId);
+		if(user_keys.size() == 0){
+			return false;
+		}
+		
+		int user_key = user_keys.get(0);
+		int hash_key = user_key % USER_HASH;
+		
+		UserInfo userInfo = null;
+		
+		/* 사용자정보 맵에서 삭제 */
+		if(userMap.get(hash_key).get(user_key) != null){
+			userInfo = userMap.get(hash_key).get(user_key);
+			userMap.get(hash_key).remove(user_key);
+		}
+		if(userMap.get(hash_key).size() == 0){
+			userMap.remove(hash_key);
+		}
+		
+		/* 사용자키 맵에서 삭제 */
+		if(userKeys.get(userInfo.getName()) != null){
+			userKeys.remove(userInfo.getName());
+		}
+		if(userKeys.get(userInfo.getEmail()) != null){
+			userKeys.remove(userInfo.getEmail());
+		}
+		if(userKeys.get(userInfo.getId()) != null){
+			userKeys.remove(userInfo.getId());
+		}
+		if(userKeys.get(userInfo.getIp()) != null){
+			userKeys.remove(userInfo.getIp());
+		}
+		return true;
+	}
+	
+	
+	public boolean isUser(String value){
+		if(userKeys.get(value) != null){
+			return true;
+		}
+		return false;
+	}
+	
+	public String getEmail(String value){
+		if(!isUser(value)){
+			return null;
+		}
+		
+		int user_key = userKeys.get(value).get(0);
+		int hash_key = user_key % USER_HASH;
+		
+		if(userMap.get(hash_key) == null){
+			return null;
+		}
+		else {
+			return userMap.get(hash_key).get(user_key).getEmail();
 		}
 	}
 	
-	
-	/* cache instance 를 초기화 한다. */
-	public void initCache(String data){
+	public String getId(String value){
+		if(!isUser(value)){
+			return null;
+		}
 		
+		int user_key = userKeys.get(value).get(0);
+		int hash_key = user_key % USER_HASH;
+		
+		if(userMap.get(hash_key) == null){
+			return null;
+		}
+		else {
+			return userMap.get(hash_key).get(user_key).getId();
+		}
 	}
+	
+	public String getIp(String value){
+		if(!isUser(value)){
+			return null;
+		}
+		
+		int user_key = userKeys.get(value).get(0);
+		int hash_key = user_key % USER_HASH;
+		
+		if(userMap.get(hash_key) == null){
+			return null;
+		}
+		else {
+			return userMap.get(hash_key).get(user_key).getIp();
+		}
+	}
+	
+	public String getName(String value){
+		if(!isUser(value)){
+			return null;
+		}
+		
+		int user_key = userKeys.get(value).get(0);
+		int hash_key = user_key % USER_HASH;
+		
+		if(userMap.get(hash_key) == null){
+			return null;
+		}
+		else {
+			return userMap.get(hash_key).get(user_key).getName();
+		}
+	}
+	
 	
 	/**
 	 * IP를 cache에 추가한다.
@@ -312,6 +420,15 @@ public class CacheBlacklist {
 		return list;
 	}
 	
+	public List<UserInfo> listUser(){
+		List<UserInfo> list = new LinkedList<UserInfo>();
+		
+		for(int first_key : userMap.keySet()){
+			list.addAll(userMap.get(first_key).values());
+		}
+		return list;
+	}
+	
 	/**
 	 * 유해url 리스트를 반환
 	 * @return
@@ -349,6 +466,7 @@ public class CacheBlacklist {
 		}
 		return true;
 	}
+	
 	public boolean removePort(String port){
 		if(port == null || "".equals(port)){
 			return false;
@@ -401,6 +519,48 @@ public class CacheBlacklist {
 		}
 		else {
 			blacklistUrl.remove(i);
+		}
+		return true;
+	}
+	
+	public boolean syncIp(List<String> ipList){
+		blacklistIp = Collections.synchronizedMap(new LinkedHashMap<String, LinkedHashMap<String, LinkedHashMap<String, long[]>>>());
+		
+		for(String ip : ipList){
+			this.addIp(ip);
+		}
+		return true;
+	}
+	
+	public boolean syncPort(List<String> portList){
+		vulnPort = Collections.synchronizedMap(new LinkedHashMap<Integer, LinkedHashMap<String, int[]>>());
+		
+		for(String port : portList){
+			this.addPort(port);
+		}
+		return true;
+	}
+	
+	public boolean syncUrl(List<String> urlList){
+		blacklistUrl = Collections.synchronizedList(new LinkedList<String>());
+		
+		for(String url : urlList){
+			this.addUrl(url);
+		}
+		return true;
+	}
+
+	public boolean syncUser(List<Map<String, String>> userList) {
+		userKeys = Collections.synchronizedMap(new LinkedHashMap<String, List<Integer>>());
+		userMap = Collections.synchronizedMap(new LinkedHashMap<Integer, LinkedHashMap<Integer, UserInfo>>());
+		userIndex = 0;
+		for(Map<String, String> user : userList){
+			UserInfo userinfo = new UserInfo();
+			userinfo.setEmail(user.get("email"));
+			userinfo.setName(user.get("name"));
+			userinfo.setId(user.get("id"));
+			userinfo.setIp(user.get("ip"));
+			this.addUser(userinfo);
 		}
 		return true;
 	}

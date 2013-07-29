@@ -1,4 +1,4 @@
-package com.igloo.blacklist.impl;
+package com.igloo.util.impl;
 
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Provides;
@@ -7,19 +7,20 @@ import org.apache.felix.ipojo.annotations.ServiceProperty;
 import org.araqne.api.Script;
 import org.araqne.api.ScriptFactory;
 
-import com.igloo.blacklist.BlackListService;
+import com.igloo.util.IglooUtilService;
 
-@Component(name = "blacklist-script-factory")
+
+@Component(name = "iglooutil-script-factory")
 @Provides
-public class BlackListScriptFactory implements ScriptFactory{
+public class IglooUtilScriptFactory implements ScriptFactory {
 	
-	@ServiceProperty(name = "alias", value = "blacklist")
+	@ServiceProperty(name = "alias", value = "iglooutil")
 	private String alias;
 	
 	@Requires
-	private BlackListService blacklist;
+	private IglooUtilService util;
 	
 	public Script createScript() {
-		return new BlackListScript(blacklist);
+		return new IglooScript(util);
 	}
 }

@@ -1,0 +1,10 @@
+com\igloo\util\impl\IglooScript.class
+com\igloo\util\IglooUtilService.class
+com\igloo\util\impl\IglooUtilServiceImpl.class
+com\igloo\util\msgbus\IglooUtilPlugin.class
+com\igloo\blacklist\BlackListLookupHandler.class
+com\igloo\util\IglooCache.class
+com\igloo\userinfo\UserLookupHandler.class
+com\igloo\blacklist\NetUtil.class
+com\igloo\util\impl\IglooUtilScriptFactory.class
+com\igloo\userinfo\UserInfo.class
