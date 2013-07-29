@@ -4,7 +4,7 @@ Build-Jdk: 1.7.0_25
 Bundle-Version: 1.0.2
 Tool: Bnd-0.0.357
 Bundle-Name: Igloo Util
-Bnd-LastModified: 1375087164766
+Bnd-LastModified: 1375087682003
 Created-By: Apache Maven Bundle Plugin
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: com.igloo.util
